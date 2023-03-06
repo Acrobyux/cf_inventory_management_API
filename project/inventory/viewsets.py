@@ -21,16 +21,24 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
     pagination_class = BasePagination
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return ProductListSerializer
+        return ProductSerializer
 
 
 # Read-only viewset for inventory (stock) because it's not supposed to be modified directly from the client
 # It's updated automatically when a movement is created or updated
 class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Inventory.objects.all()
-    serializer_class = InventorySerializer
     pagination_class = BasePagination
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return InventoryListSerializer
+        return InventorySerializer
 
     # Deny creation of new inventories
     def create(self, request, *args, **kwargs):
@@ -51,8 +59,12 @@ class InventoryViewSet(viewsets.ReadOnlyModelViewSet):
 #     - Transfer: move stock from one warehouse to another
 class MovementViewSet(viewsets.ModelViewSet):
     queryset = Movement.objects.all()
-    serializer_class = MovementSerializer
     pagination_class = BasePagination
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return MovementListSerializer
+        return MovementSerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
